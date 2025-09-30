@@ -230,7 +230,9 @@ const PredictionPage = () => {
                 <p><strong>Rockfall Probability:</strong> {rockfallProbability}%</p>
                 <div className="probability-bar-container">
                   <div
-                    className={`probability-bar ${rockfallProbability >= 70 ? 'high-risk' : rockfallProbability >= 30 ? 'moderate-risk' : 'low-risk'}`}
+                    className={`probability-bar ${
+                      rockfallProbability >= 70 ? 'high-risk' : rockfallProbability >= 30 ? 'moderate-risk' : 'low-risk'
+                    }`}
                     style={{ '--fill-width': `${rockfallProbability}%` }}
                   ></div>
                 </div>
