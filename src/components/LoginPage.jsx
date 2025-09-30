@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './LoginPage.css';
-import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+// import { auth } from '../firebase'; // Removed
+// import { signInWithEmailAndPassword } from 'firebase/auth'; // Removed
 
 const LoginPage = ({ onLoginSuccess, onClose }) => {
   const [email, setEmail] = useState('');
@@ -16,33 +16,19 @@ const LoginPage = ({ onLoginSuccess, onClose }) => {
     setError('');
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const idToken = await user.getIdToken();
+      const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+      const user = existingUsers.find(u => u.email === email && u.password === password);
 
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
-        },
-        body: JSON.stringify({}), // No body needed for login, backend verifies token
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      if (user) {
+        // Store logged-in user info (e.g., email, role) in session storage or local storage
+        localStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, role: user.userRole }));
         onLoginSuccess();
       } else {
-        setError(data.error || 'Login failed.');
+        setError('Invalid email or password.');
       }
     } catch (err) {
       console.error('Error during login:', err);
-      if (err.code === 'auth/invalid-credential') {
-        setError('Invalid email or password.');
-      } else {
-        setError('Firebase authentication error. Please try again.');
-      }
+      setError('An unexpected error occurred during login. Please try again.');
     }
   };
 

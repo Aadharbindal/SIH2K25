@@ -50,8 +50,8 @@ const generateVibrationData = (timeframe, location) => {
   }
 
   for (let i = 0; i < numPoints; i++) {
-    let ppv = parseFloat(((Math.random() * 5 + 1) * locationFactor).toFixed(1)); // Base PPV
-    let frequency = parseFloat(((Math.random() * 10 + 5) / locationFactor).toFixed(1)); // Base Frequency
+    let ppv = parseFloat(((Math.random() * 3 + 0.5) * locationFactor).toFixed(1)); // Adjusted Base PPV to be lower and more variable
+    let frequency = parseFloat(((Math.random() * 8 + 3) / locationFactor).toFixed(1)); // Adjusted Base Frequency
 
     // Simulate blast events (randomly)
     if (Math.random() < 0.15) { // 15% chance of a blast event
@@ -174,7 +174,7 @@ const GroundVibrationDetailPage = ({ onBackToDashboard }) => {
 
   return (
     <div className="ground-vibration-chart-container">
-      <div className="chart-header">
+      <div className="chart-header"> 
         <h2>Ground Vibration Data - Detailed View</h2>
         <div className="controls-container">
           <div className="timeframe-selector">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './SignupPage.css';
-import { auth } from '../firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+// import { auth } from '../firebase'; // Removed
+// import { createUserWithEmailAndPassword } from 'firebase/auth'; // Removed
 
 const SignupPage = ({ onSignupSuccess, onClose }) => {
     const [fullName, setFullName] = useState('');
@@ -34,54 +34,40 @@ const SignupPage = ({ onSignupSuccess, onClose }) => {
         }
 
         try {
-            // Step 1: Create user on the client-side with Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            const idToken = await user.getIdToken();
-            setMessage('Successfully signed up!'); // Set success message here
-            setIsSuccess(true); // Set success state
+            // Check if user already exists in local storage
+            const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+            const userExists = existingUsers.some(user => user.email === email);
 
-            // Step 2: Send the profile data to the backend for storage
-            const response = await fetch('http://localhost:5000/api/save-profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
-                },
-                body: JSON.stringify({
-                    fullName,
-                    userRole,
-                    mineLocation,
-                    phoneNumber,
-                    latitude,
-                    longitude,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // If backend also succeeds, keep success message
-                // No need to clear error or set success again, already handled above.
-                onSignupSuccess();
-            } else {
-                // If backend call fails but Firebase user created, show backend error
-                setMessage(data.error || 'Profile registration failed on backend.');
-                setIsSuccess(false); // Ensure success is false on backend error
+            if (userExists) {
+                setMessage('Email already registered. Please log in or use a different email.');
+                setIsSuccess(false);
+                setIsLoading(false);
+                return;
             }
+
+            // Store user data in local storage
+            const newUser = {
+                fullName,
+                email,
+                password, // In a real app, hash this password before storing locally or sending to a backend
+                userRole,
+                mineLocation,
+                phoneNumber,
+                latitude,
+                longitude,
+                // idProof is typically uploaded to a server, not stored in local storage
+            };
+
+            const updatedUsers = [...existingUsers, newUser];
+            localStorage.setItem('users', JSON.stringify(updatedUsers));
+
+            setMessage('Signup successful! You can now log in.');
+            setIsSuccess(true);
+            onSignupSuccess(); // Notify parent component of successful signup
+
         } catch (err) {
-            console.error('Error during Firebase registration:', err); // Log the full error object
-            // Handle specific Firebase auth errors
-            if (err.code === 'auth/email-already-in-use') {
-                setMessage('Email already in use. Please use a different email.');
-            } else if (err.code === 'auth/weak-password') {
-                setMessage('Password is too weak. Please choose a stronger password.');
-            } else if (err.code) {
-                // Display more specific Firebase errors if available
-                setMessage(`Firebase Error: ${err.code.replace('auth/', '').replace(/[-]/g, ' ').toUpperCase()}. Please try again.`);
-            } else {
-                setMessage(''); // Revert to a more general error for unexpected cases
-            }
+            console.error('Error during signup:', err);
+            setMessage('An unexpected error occurred during signup. Please try again.');
             setIsSuccess(false); // Ensure success is false on error
         } finally {
             setIsLoading(false);

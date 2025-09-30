@@ -50,12 +50,12 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, isLoggedIn }) => {
             </Link>
           </li>
           {isLoggedIn && (
-          <li className="nav-item">
-            <Link to="/prediction" className="nav-link">
-              <span className="icon">&#x1F52E;</span> {/* Prediction icon */}
-              <span className="text">Prediction</span>
-            </Link>
-          </li>
+            <li className="nav-item">
+              <Link to="/prediction" className="nav-link">
+                <span className="icon">&#x1F52E;</span> {/* Prediction icon */}
+                <span className="text">Prediction</span>
+              </Link>
+            </li>
           )}
         </ul>
       </nav>

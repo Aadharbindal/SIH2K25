@@ -1,6 +1,7 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
+const fetch = require('node-fetch').default; // Correct import for node-fetch v3 with CommonJS
 
 // ======================================================================
 // --- Firebase & Express Initialization ---
@@ -16,7 +17,11 @@ admin.initializeApp({
 const db = admin.firestore();
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'http://localhost:5174' }));
+
+// Handle OPTIONS requests for CORS preflight
+app.options('/api/save-profile', cors());
+app.options('/api/login', cors());
 
 // ======================================================================
 // --- API Endpoint for User Registration ---
@@ -128,10 +133,38 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ======================================================================
+// --- API Endpoint for ML Predictions ---
+// ======================================================================
+app.post('/api/predict-rockfall', async (req, res) => {
+  try {
+    const mlServiceUrl = 'http://127.0.0.1:5000/predict'; // Flask app URL
+    const response = await fetch(mlServiceUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`ML Service error: ${response.status} - ${errorData.error || response.statusText}`);
+    }
+
+    const predictionResult = await response.json();
+    return res.status(200).json(predictionResult);
+
+  } catch (error) {
+    console.error(`Error during ML prediction request: ${error.message}`);
+    return res.status(500).json({ error: "Failed to get prediction from ML service.", details: error.message });
+  }
+});
+
+// ======================================================================
 // --- Run the Express Application ---
 // ======================================================================
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

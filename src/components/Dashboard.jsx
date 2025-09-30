@@ -10,9 +10,9 @@ import GroundVibrationDetailPage from './GroundVibrationDetailPage'; // Import t
 // import LoginPage from './LoginPage'; // Removed as LoginPage is now in App.jsx
 import './Dashboard.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCircle, faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { faUserCircle, faCaretDown, faTimes } from '@fortawesome/free-solid-svg-icons'; // Import faTimes for close button
 
-const Dashboard = ({ isLoggedIn, handleLoginClick, handleSignupClick, handleLogout }) => {
+const Dashboard = ({ isLoggedIn, handleLoginClick, handleSignupClick, handleLogout, signupMessage, setSignupMessage }) => {
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [showGroundVibrationDetail, setShowGroundVibrationDetail] = useState(false); // New state for detail page
 
@@ -21,6 +21,16 @@ const Dashboard = ({ isLoggedIn, handleLoginClick, handleSignupClick, handleLogo
     window.addEventListener('closeDashboardDropdown', closeDropdown);
     return () => window.removeEventListener('closeDashboardDropdown', closeDropdown);
   }, []);
+
+  // Clear signup message after a few seconds or on component unmount
+  useEffect(() => {
+    if (signupMessage) {
+      const timer = setTimeout(() => {
+        setSignupMessage(null);
+      }, 8000); // Clear message after 8 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [signupMessage, setSignupMessage]);
 
   const toggleNotificationsDropdown = () => {
     setShowNotificationsDropdown(prevState => !prevState);
@@ -70,14 +80,23 @@ const Dashboard = ({ isLoggedIn, handleLoginClick, handleSignupClick, handleLogo
               )}
             </div>
           ) : (
-            <>
+            <div className="auth-buttons">
+              <button className="login-button" onClick={handleLoginClick}>Log In</button>
               <button className="signup-button" onClick={handleSignupClick}>Sign Up</button>
-              {/* <span className="auth-separator">/</span> */}
-              <button className="login-button" onClick={handleLoginClick}>Login</button>
-            </>
+            </div>
           )}
         </div>
       </header>
+
+      {signupMessage && (
+        <div className="signup-success-message">
+          {signupMessage}
+          <button className="close-message-button" onClick={() => setSignupMessage(null)}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
+      )}
+
       {showGroundVibrationDetail ? (
         <GroundVibrationDetailPage onBackToDashboard={handleBackToDashboard} />
       ) : (

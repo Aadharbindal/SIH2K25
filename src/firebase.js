@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBq_0e-T3vS0Vr0HKSIg102Mf-t3MVQ_Wo",
+  apiKey: "AIzaSyBq_0e-T3vS0Vr0HKSIg102Mf-t3MVQ_Wo", // Replaced with your actual Firebase API Key
   authDomain: "mining-90eeb.firebaseapp.com",
   projectId: "mining-90eeb",
   storageBucket: "mining-90eeb.appspot.com",
